@@ -40,7 +40,7 @@ function startSingleJob(conf: Config) {
 
         beforeRun: new SyncHook(['manifestPath']),
         run: new AsyncSeriesHook(['outputDir']),
-        afterRun: new AsyncSeriesHook(['rpkPath']),
+        afterRun: new AsyncSeriesHook(['rpkPaths']),
 
         done: new AsyncParallelHook(['outputDir']),
     };
@@ -79,8 +79,10 @@ function startSingleJob(conf: Config) {
     hooks.beforeRun.call(fileList.filter(f => f.indexOf('manifest.json') >= 0)[0]);
 
     hooks.run.callAsync(outputDir, () => {
-        const rpkPath = path.join(outputDir, 'dist', 'com.novel.quick.release.rpk')
-        hooks.afterRun.callAsync(rpkPath, () => {
+        // const rpkPaths = path.join(outputDir, 'dist', 'com.novel.quick.release.rpk');
+        const distPath = path.join(outputDir, 'dist');
+        const rpkPaths = readdirSync(distPath).map((name: string) => path.join(distPath, name));
+        hooks.afterRun.callAsync(rpkPaths, () => {
             hooks.done.callAsync(outputDir, () => {});
         });
     });
